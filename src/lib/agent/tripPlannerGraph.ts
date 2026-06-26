@@ -226,6 +226,8 @@ ${feedbackSection}
 IMPORTANT BOOKING RULES:
 - For flight recommendations, you MUST include a \`bookingUrl\` to real platforms like MakeMyTrip, Skyscanner, Indigo, or AirIndia.
 - For hotel recommendations, you MUST include a \`bookingUrl\` to trustable platforms like OYO, MakeMyTrip, Agoda, or Booking.com.
+- PRICING: Ensure all prices are HIGHLY REALISTIC for the given currency (${state.currency}). For example, if using INR, flights and hotels usually cost thousands, not hundreds. Do NOT underestimate costs!
+- TRANSPORTATION: If the origin and destination are in the same country or relatively close, prioritize recommending Trains (e.g., IRCTC) or Buses (e.g., RedBus) with connecting routes instead of flights to provide a better local experience.
 
 RESEARCH DATA:
 HOTELS: ${get("hotel").slice(0, 800)}
@@ -289,6 +291,7 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
     // Dynamically calculate total cost rather than trusting LLM math
     let computedTotalCost = 0;
     days.forEach(day => {
+      let dayTotal = 0;
       day.activities?.forEach(act => {
         if (typeof act.estimatedCost === "string") {
           const numStr = (act.estimatedCost as string).replace(/[^0-9.]/g, "");
@@ -296,8 +299,10 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
         } else if (typeof act.estimatedCost !== "number") {
           act.estimatedCost = 0;
         }
+        dayTotal += act.estimatedCost;
         computedTotalCost += act.estimatedCost;
       });
+      day.dailyCost = dayTotal;
     });
 
     const totalEstimatedCost: number = computedTotalCost > 0 ? computedTotalCost : state.budget;
