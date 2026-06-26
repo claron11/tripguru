@@ -15,7 +15,9 @@ export async function GET(request: Request) {
 
   try {
     // 1. Geocoding
-    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(destination)}&count=1`);
+    // Clean destination to improve geocoding match (e.g. "Jhālāwār, Rajasthan, India" -> "Jhālāwār")
+    const cleanDestination = destination.split(",")[0].trim();
+    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cleanDestination)}&count=1`);
     const geoData = await geoRes.json();
     
     if (!geoData.results || geoData.results.length === 0) {

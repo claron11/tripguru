@@ -23,7 +23,8 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
     Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; 
+  const straightLine = R * c; 
+  return straightLine * 1.3; // Multiply by 1.3 to approximate road/driving distance
 }
 
 interface TimelineProps {
@@ -201,10 +202,10 @@ export default function Timeline({ days, currency = "INR" }: TimelineProps) {
 
                     return (
                       <React.Fragment key={idx}>
-                        {idx > 0 && distanceStr && (
+                        {idx > 0 && (
                           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginLeft: "13px", marginTop: "-4px", marginBottom: "-4px", color: "var(--color-text-muted)", fontSize: "0.75rem", zIndex: 1 }}>
-                            <div style={{ width: "2px", height: "16px", background: "var(--glass-border)", borderRadius: "1px" }} />
-                            <span>{distanceStr}</span>
+                            <div style={{ width: "2px", height: "24px", background: "var(--glass-border)", borderRadius: "1px" }} />
+                            {distanceStr && <span>{distanceStr}</span>}
                           </div>
                         )}
                         <motion.div
