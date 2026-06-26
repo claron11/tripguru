@@ -318,7 +318,10 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
     return { draft: days, totalEstimatedCost, logs };
   } catch (err) {
     const msg = (err as Error).message;
-    logs.push(`[DRAFT AGENT] ❌ Groq error: ${msg}`);
+    const is429 = msg.includes("429") || msg.includes("rate_limit") || msg.includes("Too Many Requests") || msg.includes("rate limit");
+    const displayMsg = is429 ? "API ERROR - 429" : `API error occurred: ${msg}`;
+    
+    logs.push(`[DRAFT AGENT] ❌ Groq error: ${is429 ? "429 Rate Limit" : msg}`);
     logs.push("[DRAFT AGENT] 🔄 Generating structured fallback...");
 
     const fallback: IDay[] = Array.from({ length: numDays }, (_, i) => {
@@ -332,7 +335,7 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
           {
             time: "09:00",
             name: "Morning exploration",
-            description: `Explore ${state.destination} — API error occurred: ${msg}`,
+            description: `Explore ${state.destination} — ${displayMsg}`,
             location: state.destination,
             locationLink: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(state.destination)}`,
             estimatedCost: Math.round(state.budget / numDays),
