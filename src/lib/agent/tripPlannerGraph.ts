@@ -56,6 +56,8 @@ function getLLM() {
     model: "llama-3.3-70b-versatile",
     apiKey: process.env.GROQ_API_KEY,
     temperature: 0.3,
+    maxTokens: 8000,
+    maxRetries: 2,
   });
 }
 
