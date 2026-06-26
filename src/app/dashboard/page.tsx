@@ -110,86 +110,118 @@ export default function DashboardPage() {
     let pageNum = 1;
     drawPageDesign(pageNum);
     
-    let y = 48;
+    let y = 45;
+    const marginL = 20;
+    const marginR = 190;
+    const contentW = marginR - marginL;
     
     // Trip Title
-    doc.setFontSize(24);
+    doc.setFontSize(26);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-    doc.text(`Trip to ${trip.destination}`, 20, y);
-    y += 10;
+    doc.text(`Trip to ${trip.destination}`, marginL, y);
+    y += 9;
     
     // Trip Metadata
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
     doc.setTextColor(100, 110, 130);
-    doc.text(`${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}`, 20, y);
-    y += 7;
-    doc.text(`Estimated Cost: ${trip.currency} ${trip.totalEstimatedCost ?? trip.budget}`, 20, y);
-    y += 16;
+    doc.text(`DATE: `, marginL, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}`, marginL + 13, y);
+    y += 6;
+    doc.setFont("helvetica", "bold");
+    doc.text(`BUDGET: `, marginL, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${trip.currency} ${trip.totalEstimatedCost ?? trip.budget}`, marginL + 19, y);
+    y += 15;
+    
+    // Draw a subtle line separator
+    doc.setDrawColor(220, 225, 235);
+    doc.setLineWidth(0.5);
+    doc.line(marginL, y, marginR, y);
+    y += 12;
     
     days.forEach((day) => {
       if (y > 260) {
         doc.addPage();
         pageNum++;
         drawPageDesign(pageNum);
-        y = 48;
+        y = 45;
       }
       
-      // Day Header (pill shape)
-      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.roundedRect(20, y - 7, 170, 12, 3, 3, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(11);
+      // Day Header (Elegant Block)
+      doc.setFillColor(surfaceAlt[0], surfaceAlt[1], surfaceAlt[2]); // light blue bg
+      doc.rect(marginL, y, contentW, 14, 'F');
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]); // dark blue accent left
+      doc.rect(marginL, y, 4, 14, 'F');
+      
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
-      doc.text(`Day ${day.day} - ${day.title} (${day.date})`, 25, y + 1);
-      y += 12;
+      doc.text(`DAY ${day.day} - ${day.title.toUpperCase()}`, marginL + 10, y + 9);
+      y += 22;
       
       day.activities.forEach((act) => {
         if (y > 275) {
           doc.addPage();
           pageNum++;
           drawPageDesign(pageNum);
-          y = 48;
+          y = 45;
         }
         
-        doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "bold");
-        doc.text(`${act.time} - ${act.name}`, 25, y);
+        // Draw timeline dot & line
+        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.circle(marginL + 2, y - 2, 1.5, 'F');
         
-        // Cost
+        doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text(`${act.time} - ${act.name}`, marginL + 8, y);
+        
+        // Cost (Right Aligned)
         if (act.estimatedCost) {
           doc.setTextColor(5, 150, 105);
-          doc.text(`${trip.currency} ${act.estimatedCost.toLocaleString()}`, 185, y, { align: "right" });
+          doc.text(`${trip.currency} ${act.estimatedCost.toLocaleString()}`, marginR, y, { align: "right" });
         }
         
         y += 6;
         
+        // Description
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(80, 90, 110);
-        const splitDesc = doc.splitTextToSize(act.description || "", 160);
-        doc.text(splitDesc, 25, y);
+        const splitDesc = doc.splitTextToSize(act.description || "", contentW - 8);
+        doc.text(splitDesc, marginL + 8, y);
         y += (splitDesc.length * 5) + 3;
 
-        // Map location
+        // Map location (Sleek Box style)
         if (act.location) {
+           doc.setFillColor(245, 248, 250);
+           doc.roundedRect(marginL + 8, y - 4, contentW - 8, 8, 1, 1, 'F');
+           
            doc.setTextColor(26, 86, 219);
            doc.setFont("helvetica", "bold");
-           doc.text(`[View on Map]`, 25, y);
+           doc.setFontSize(9);
+           doc.text(`[VIEW MAP]`, marginL + 12, y + 1);
+           
            doc.setFont("helvetica", "normal");
            doc.setTextColor(100, 110, 130);
-           doc.text(` - ${act.location}`, 25 + doc.getTextWidth(`[View on Map]`), y);
+           doc.text(`- ${act.location}`, marginL + 12 + doc.getTextWidth(`[VIEW MAP]`), y + 1);
            
            const linkUrl = act.locationLink || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(act.location)}`;
-           doc.link(25, y - 4, doc.getTextWidth(`[View on Map]`), 5, { url: linkUrl });
-           y += 6;
+           doc.link(marginL + 8, y - 4, contentW - 8, 8, { url: linkUrl });
+           y += 8;
         }
 
-        y += 4;
+        y += 6;
+        
+        // Draw timeline connector line if not last (approximation)
+        doc.setDrawColor(220, 225, 235);
+        doc.setLineWidth(0.3);
+        doc.line(marginL + 2, y - 30, marginL + 2, y - 8);
       });
-      y += 6;
+      y += 8;
     });
 
     doc.save(`TripGuru_${trip.destination.replace(/[^a-z0-9]/gi, '_')}.pdf`);
