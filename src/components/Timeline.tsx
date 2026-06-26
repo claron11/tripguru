@@ -276,7 +276,7 @@ export default function Timeline({ days, currency = "INR" }: TimelineProps) {
                             }}
                           >
                             <MapPin size={12} />
-                            Open Map
+                            Navigate to {activity.location}
                           </a>
                         )}
                       </div>
