@@ -125,7 +125,7 @@ function makeWorker(
         data = typeof res.content === "string" ? res.content : JSON.stringify(res.content);
         logs.push(`${prefix} ✅ Groq fallback succeeded`);
       } catch (llmErr) {
-        logs.push(`${prefix} ❌ Both failed: ${(geminiErr as Error).message}`);
+        logs.push(`${prefix} ❌ Both failed: ${(llmErr as Error).message}`);
         data = `No ${category} data available`;
       }
     }
