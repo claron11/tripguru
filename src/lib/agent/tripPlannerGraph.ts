@@ -52,13 +52,38 @@ async function tavilySearch(query: string): Promise<string> {
 
 // ─── Groq helper ──────────────────────────────────────────────────────────────
 export function getLLM() {
-  return new ChatGroq({
+  // Collect all possible keys (support comma-separated and multiple variables)
+  const rawKeys = [
+    ...(process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.split(",") : []),
+    ...(process.env.GROQ_API_KEY_2 ? process.env.GROQ_API_KEY_2.split(",") : [])
+  ].map(k => k.trim()).filter(Boolean);
+  
+  const uniqueKeys = Array.from(new Set(rawKeys));
+
+  if (uniqueKeys.length === 0) {
+    // Fallback if env is somehow empty, will naturally throw an auth error
+    return new ChatGroq({
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.3,
+      maxTokens: 8000,
+      maxRetries: 2,
+    });
+  }
+
+  const llms = uniqueKeys.map((key) => new ChatGroq({
     model: "llama-3.3-70b-versatile",
-    apiKey: process.env.GROQ_API_KEY,
+    apiKey: key,
     temperature: 0.3,
     maxTokens: 8000,
-    maxRetries: 2,
-  });
+    maxRetries: 1, // Fail fast to let the fallback mechanism try the next key
+  }));
+
+  if (llms.length === 1) {
+    return llms[0];
+  }
+
+  // Create fallback chain if multiple keys exist
+  return llms[0].withFallbacks({ fallbacks: llms.slice(1) });
 }
 
 // ─── State Annotation ─────────────────────────────────────────────────────────
