@@ -79,11 +79,12 @@ export default function WeatherWidget({ destination, startDate, endDate }: Weath
             transition={{ duration: 0.4 }}
           >
             <div style={{ 
-              background: "white", 
+              background: "var(--color-surface-alt)", 
               padding: "16px", 
               borderRadius: "12px", 
               boxShadow: "var(--shadow-sm)",
-              marginBottom: "16px"
+              marginBottom: "16px",
+              border: "1px solid var(--color-border)"
             }}>
               <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-text-secondary)", lineHeight: "1.5" }}>
                 <strong>Forecast:</strong> {data?.weatherSummary}
