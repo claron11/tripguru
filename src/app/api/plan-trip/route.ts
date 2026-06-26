@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
                 flightWorker:      "✈️  Flight agent searching via Tavily...",
                 restaurantWorker:  "🍽️  Restaurant agent searching via Tavily...",
                 attractionWorker:  "🗺️  Attraction agent searching via Tavily...",
-                draftAgent:        "🧠 Draft agent synthesizing with Gemini 2.5 Flash...",
+                draftAgent:        "🧠 Draft agent synthesizing with Groq (Llama 3)...",
                 humanReview:       "⏸️  Pausing for human review...",
               };
               if (nodeLabels[nodeName]) {
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
         if (!draft || draft.length === 0) {
           sendEvent({
             type: "error",
-            message: "❌ Draft generation failed — Gemini returned no itinerary. Check API key and try again.",
+            message: "❌ Draft generation failed — Groq returned no itinerary. Check API key and try again.",
           });
         } else {
           sendEvent({

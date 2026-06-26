@@ -17,7 +17,7 @@ import {
   Send,
   StateGraph,
 } from "@langchain/langgraph";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatGroq } from "@langchain/groq";
 import { IDay, WorkerResult } from "./types";
 
 // ─── Tavily helper ────────────────────────────────────────────────────────────
@@ -50,11 +50,11 @@ async function tavilySearch(query: string): Promise<string> {
   return `${data.answer || ""}\n\n${snippets}`.trim();
 }
 
-// ─── Gemini helper ────────────────────────────────────────────────────────────
-function getGemini() {
-  return new ChatGoogleGenerativeAI({
-    model: "gemini-2.5-flash",
-    apiKey: process.env.GEMINI_API_KEY,
+// ─── Groq helper ──────────────────────────────────────────────────────────────
+function getLLM() {
+  return new ChatGroq({
+    modelName: "llama3-70b-8192",
+    apiKey: process.env.GROQ_API_KEY,
     temperature: 0.3,
   });
 }
@@ -115,16 +115,16 @@ function makeWorker(
       logs.push(`${prefix} ✅ Tavily returned ${data.length} chars`);
     } catch (tavilyErr) {
       logs.push(`${prefix} ⚠️ Tavily failed: ${(tavilyErr as Error).message}`);
-      logs.push(`${prefix} 🤖 Falling back to Gemini...`);
-      source = "gemini";
+      logs.push(`${prefix} 🤖 Falling back to Groq...`);
+      source = "groq" as any;
       try {
-        const gemini = getGemini();
-        const res = await gemini.invoke(
+        const llm = getLLM();
+        const res = await llm.invoke(
           `Research ${category}s for a trip to ${state.destination}. Budget: ${state.currency} ${state.budget}. Dates: ${state.startDate} to ${state.endDate}. Preferences: ${state.preferences.join(", ")}. Return detailed options with names, descriptions, and prices in ${state.currency}.`
         );
         data = typeof res.content === "string" ? res.content : JSON.stringify(res.content);
-        logs.push(`${prefix} ✅ Gemini fallback succeeded`);
-      } catch (geminiErr) {
+        logs.push(`${prefix} ✅ Groq fallback succeeded`);
+      } catch (llmErr) {
         logs.push(`${prefix} ❌ Both failed: ${(geminiErr as Error).message}`);
         data = `No ${category} data available`;
       }
@@ -191,9 +191,9 @@ async function aggregatorNode(state: TripStateType): Promise<Partial<TripStateTy
   };
 }
 
-// ─── Draft Agent (1x Gemini call) ─────────────────────────────────────────────
+// ─── Draft Agent (1x Groq call) ───────────────────────────────────────────────
 async function draftAgentNode(state: TripStateType): Promise<Partial<TripStateType>> {
-  const logs = ["[DRAFT AGENT] 🧠 Synthesizing all research with Gemini 2.5 Flash..."];
+  const logs = ["[DRAFT AGENT] 🧠 Synthesizing all research with Groq (Llama 3)..."];
 
   const startDate = new Date(state.startDate);
   const endDate   = new Date(state.endDate);
@@ -254,10 +254,10 @@ RESPOND WITH ONLY VALID JSON — NO MARKDOWN, NO EXPLANATION:
 Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/afternoon/evening. Include hotel check-in on day 1, flight on day 1 and last day. Costs must sum close to ${state.budget}. Return ONLY the JSON object.`;
 
   try {
-    const gemini = getGemini();
-    logs.push("[DRAFT AGENT] 📡 Calling Gemini 2.5 Flash API...");
+    const llm = getLLM();
+    logs.push("[DRAFT AGENT] 📡 Calling Groq API...");
 
-    const response = await gemini.invoke(prompt);
+    const response = await llm.invoke(prompt);
     const rawText = typeof response.content === "string"
       ? response.content
       : JSON.stringify(response.content);
@@ -284,7 +284,7 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
     return { draft: days, totalEstimatedCost, logs };
   } catch (err) {
     const msg = (err as Error).message;
-    logs.push(`[DRAFT AGENT] ❌ Gemini error: ${msg}`);
+    logs.push(`[DRAFT AGENT] ❌ Groq error: ${msg}`);
     logs.push("[DRAFT AGENT] 🔄 Generating structured fallback...");
 
     const fallback: IDay[] = Array.from({ length: numDays }, (_, i) => {
