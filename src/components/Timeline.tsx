@@ -292,6 +292,7 @@ export default function Timeline({ days, currency = "INR" }: TimelineProps) {
                             Book <ExternalLink size={10} />
                           </a>
                         )}
+                      </div>
                       </motion.div>
                     </React.Fragment>
                   );
