@@ -52,7 +52,7 @@ async function tavilySearch(query: string): Promise<string> {
 }
 
 // ─── Gemini helper ──────────────────────────────────────────────────────────────
-export function getLLM() {
+export function getLLM(schema?: any, schemaName?: string): any {
   // Collect all possible keys (support comma-separated and multiple variables)
   const rawKeys = [
     ...(process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.split(",") : []),
@@ -63,21 +63,27 @@ export function getLLM() {
 
   if (uniqueKeys.length === 0) {
     // Fallback if env is somehow empty, will naturally throw an auth error
-    return new ChatGoogleGenerativeAI({
+    let base: any = new ChatGoogleGenerativeAI({
       model: "gemini-2.5-flash",
       temperature: 0.3,
       maxOutputTokens: 8000,
       maxRetries: 2,
     });
+    if (schema) base = base.withStructuredOutput(schema, schemaName ? { name: schemaName } : undefined);
+    return base;
   }
 
-  const llms = uniqueKeys.map((key) => new ChatGoogleGenerativeAI({
-    model: "gemini-2.5-flash",
-    apiKey: key,
-    temperature: 0.3,
-    maxOutputTokens: 8000,
-    maxRetries: 1, // Fail fast to let the fallback mechanism try the next key
-  }));
+  const llms = uniqueKeys.map((key) => {
+    let base: any = new ChatGoogleGenerativeAI({
+      model: "gemini-2.5-flash",
+      apiKey: key,
+      temperature: 0.3,
+      maxOutputTokens: 8000,
+      maxRetries: 1, // Fail fast to let the fallback mechanism try the next key
+    });
+    if (schema) base = base.withStructuredOutput(schema, schemaName ? { name: schemaName } : undefined);
+    return base;
+  });
 
   if (llms.length === 1) {
     return llms[0];
@@ -296,8 +302,6 @@ RESPOND WITH ONLY VALID JSON — NO MARKDOWN, NO EXPLANATION:
 Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/afternoon/evening. Include hotel check-in on day 1, flight on day 1 and last day. Costs must sum close to ${state.budget}. Return ONLY the JSON object.`;
 
   try {
-    const llm = getLLM();
-    logs.push("[DRAFT AGENT] 📡 Calling Gemini API...");
 
     const activitySchema = z.object({
       time: z.string(),
@@ -323,8 +327,10 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
       }))
     });
 
-    const structuredLlm = llm.withStructuredOutput(responseSchema, { name: "trip_itinerary" });
-    const parsed = await structuredLlm.invoke(prompt);
+    const llm = getLLM(responseSchema, "trip_itinerary");
+    logs.push("[DRAFT AGENT] 📡 Calling Gemini API...");
+
+    const parsed = await llm.invoke(prompt);
     
     const days: IDay[] = parsed.days as IDay[] || [];
     
