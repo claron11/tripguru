@@ -1,13 +1,7 @@
 "use client";
-
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import dynamic from "next/dynamic";
 import { IDay, IActivity } from "@/lib/agent/types";
-
-const RouteMap = dynamic(() => import("./RouteMap"), { 
-  ssr: false, 
-  loading: () => <div style={{ height: "300px", width: "100%", background: "var(--bg-secondary)", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px" }}><span className="spinner"></span></div> 
-});
 import {
   Hotel,
   Plane,
@@ -19,6 +13,18 @@ import {
   Car,
   Star,
 } from "lucide-react";
+
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; 
+}
 
 interface TimelineProps {
   days: IDay[];
@@ -177,17 +183,36 @@ export default function Timeline({ days, currency = "INR" }: TimelineProps) {
                   </div>
                 </div>
 
-                {/* Day Route Map */}
-                <RouteMap activities={day.activities} />
+                </div>
 
                 {/* Activities */}
                 <div className="activity-list">
-                  {day.activities.map((activity, idx) => (
-                    <motion.div
-                      key={idx}
-                      className="activity-item"
-                      variants={activityVariants}
-                    >
+                  {day.activities.map((activity, idx) => {
+                    let distanceStr = null;
+                    if (idx > 0 && activity.coordinates && day.activities[idx-1].coordinates) {
+                       const dist = calculateDistance(
+                         day.activities[idx-1].coordinates!.lat, 
+                         day.activities[idx-1].coordinates!.lng, 
+                         activity.coordinates!.lat, 
+                         activity.coordinates!.lng
+                       );
+                       if (dist > 0.1) {
+                         distanceStr = dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`;
+                       }
+                    }
+
+                    return (
+                      <React.Fragment key={idx}>
+                        {idx > 0 && distanceStr && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginLeft: "13px", marginTop: "-4px", marginBottom: "-4px", color: "var(--color-text-muted)", fontSize: "0.75rem", zIndex: 1 }}>
+                            <div style={{ width: "2px", height: "16px", background: "var(--glass-border)", borderRadius: "1px" }} />
+                            <span>{distanceStr}</span>
+                          </div>
+                        )}
+                        <motion.div
+                          className="activity-item"
+                          variants={activityVariants}
+                        >
                       {/* Category icon */}
                       <div
                         style={{
@@ -267,10 +292,11 @@ export default function Timeline({ days, currency = "INR" }: TimelineProps) {
                             Book <ExternalLink size={10} />
                           </a>
                         )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+                      </motion.div>
+                    </React.Fragment>
+                  );
+                })}
+              </div>
               </div>
             </motion.div>
           ))}
