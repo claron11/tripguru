@@ -70,9 +70,9 @@ function Step1({ data, onChange }: { data: Step1Data; onChange: (d: Step1Data) =
 }
 
 // ─── Step 2: Budget & Dates ───────────────────────────────────────────────────
-interface Step2Data { budget: string; currency: string; startDate: string; endDate: string }
+interface Step2Data { budget: string; currency: string; startDate: string; endDate: string; numPeople: number; }
 function Step2({ data, onChange }: { data: Step2Data; onChange: (d: Step2Data) => void }) {
-  const currencies = ["USD", "EUR", "GBP", "JPY", "INR", "AUD", "CAD"];
+  const currencies = ["INR", "USD", "EUR", "GBP", "JPY", "AUD", "CAD"];
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>
@@ -100,6 +100,20 @@ function Step2({ data, onChange }: { data: Step2Data; onChange: (d: Step2Data) =
             placeholder="e.g. 3000"
             value={data.budget}
             onChange={(e) => onChange({ ...data, budget: e.target.value })}
+          />
+        </div>
+        <div className="form-group">
+          <label className="form-label" htmlFor="num-people">
+            👥 Number of People
+          </label>
+          <input
+            id="num-people"
+            className="form-input"
+            type="number"
+            min="1"
+            max="20"
+            value={data.numPeople}
+            onChange={(e) => onChange({ ...data, numPeople: parseInt(e.target.value) || 1 })}
           />
         </div>
       </div>
@@ -162,7 +176,7 @@ const ALL_PREFS = [
   "🌟 Luxury", "📸 Photography", "🎵 Music & Festivals",
 ];
 
-interface Step3Data { preferences: string[]; additionalNotes: string }
+interface Step3Data { preferences: string[]; additionalNotes: string; vegetarian: boolean; }
 function Step3({ data, onChange }: { data: Step3Data; onChange: (d: Step3Data) => void }) {
   const toggle = (pref: string) => {
     const exists = data.preferences.includes(pref);
@@ -175,6 +189,18 @@ function Step3({ data, onChange }: { data: Step3Data; onChange: (d: Step3Data) =
   };
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--bg-secondary)", padding: "12px", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+        <input 
+          type="checkbox" 
+          id="veg-checkbox"
+          checked={data.vegetarian}
+          onChange={(e) => onChange({ ...data, vegetarian: e.target.checked })}
+          style={{ width: "16px", height: "16px", accentColor: "var(--primary)" }}
+        />
+        <label htmlFor="veg-checkbox" style={{ margin: 0, fontWeight: 500, cursor: "pointer", color: "var(--text-primary)" }}>
+          🥦 Pure Vegetarian Food Only
+        </label>
+      </div>
       <p className="text-muted" style={{ fontSize: "0.9rem" }}>
         Select your travel style and interests. Our AI will tailor the itinerary to match.
       </p>
@@ -227,8 +253,8 @@ export default function PlanTripPage() {
   const [step, setStep] = useState(1);
 
   const [loc, setLoc] = useState<{ origin: string; destination: string }>({ origin: "", destination: "" });
-  const [budget, setBudget] = useState({ budget: "", currency: "USD", startDate: "", endDate: "" });
-  const [prefs, setPrefs] = useState<{ preferences: string[]; additionalNotes: string }>({ preferences: [], additionalNotes: "" });
+  const [budget, setBudget] = useState({ budget: "", currency: "INR", startDate: "", endDate: "", numPeople: 2 });
+  const [prefs, setPrefs] = useState({ preferences: [] as string[], additionalNotes: "", vegetarian: true });
 
   const [isPlanning, setIsPlanning] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -269,6 +295,8 @@ export default function PlanTripPage() {
           startDate: budget.startDate,
           endDate: budget.endDate,
           preferences: prefs.additionalNotes.trim() ? [...prefs.preferences, `Additional Notes: ${prefs.additionalNotes.trim()}`] : prefs.preferences,
+          numPeople: budget.numPeople,
+          vegetarian: prefs.vegetarian,
         }),
       });
 
@@ -339,6 +367,8 @@ export default function PlanTripPage() {
           startDate: budget.startDate,
           endDate: budget.endDate,
           preferences: prefs.additionalNotes.trim() ? [...prefs.preferences, `Additional Notes: ${prefs.additionalNotes.trim()}`] : prefs.preferences,
+          numPeople: budget.numPeople,
+          vegetarian: prefs.vegetarian,
         }),
       });
 

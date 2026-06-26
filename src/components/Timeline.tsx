@@ -61,7 +61,7 @@ const activityVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
 };
 
-export default function Timeline({ days, currency = "USD" }: TimelineProps) {
+export default function Timeline({ days, currency = "INR" }: TimelineProps) {
   if (!days || days.length === 0) {
     return (
       <div className="loading-overlay">

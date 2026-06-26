@@ -71,6 +71,8 @@ const TripState = Annotation.Root({
   startDate:     Annotation<string>({ reducer: (_, b) => b }),
   endDate:       Annotation<string>({ reducer: (_, b) => b }),
   preferences:   Annotation<string[]>({ reducer: (_, b) => b }),
+  numPeople:     Annotation<number>({ reducer: (_, b) => b, default: () => 1 }),
+  vegetarian:    Annotation<boolean>({ reducer: (_, b) => b, default: () => false }),
   userId:        Annotation<string>({ reducer: (_, b) => b }),
 
   // Worker results — reducer merges partial objects so parallel writes don't overwrite each other
@@ -214,10 +216,16 @@ async function draftAgentNode(state: TripStateType): Promise<Partial<TripStateTy
 TRIP DETAILS:
 - Origin: ${state.origin || "Not specified"}
 - Destination: ${state.destination}
-- Budget: ${state.currency} ${state.budget} TOTAL
+- Number of Travelers: ${state.numPeople}
+- Total Group Budget: ${state.currency} ${state.budget} (Make sure individual activity costs align with the total budget for ${state.numPeople} people)
 - Dates: ${state.startDate} → ${state.endDate} (${numDays} days)
+- Dietary: ${state.vegetarian ? "Strictly Vegetarian (Only recommend vegetarian or veg-friendly places)" : "No restrictions"}
 - Preferences: ${state.preferences.join(", ") || "none"}
 ${feedbackSection}
+
+IMPORTANT BOOKING RULES:
+- For flight recommendations, you MUST include a \`bookingUrl\` to real platforms like MakeMyTrip, Skyscanner, Indigo, or AirIndia.
+- For hotel recommendations, you MUST include a \`bookingUrl\` to trustable platforms like OYO, MakeMyTrip, Agoda, or Booking.com.
 
 RESEARCH DATA:
 HOTELS: ${get("hotel").slice(0, 800)}

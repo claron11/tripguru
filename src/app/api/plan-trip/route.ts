@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { origin, destination, budget, currency, startDate, endDate, preferences } = body;
+  const { origin, destination, budget, currency, startDate, endDate, preferences, numPeople, vegetarian } = body;
 
   if (!destination || !budget || !startDate || !endDate) {
     return new Response(JSON.stringify({ error: "Missing required fields" }), {
@@ -51,6 +51,8 @@ export async function POST(req: NextRequest) {
           startDate,
           endDate,
           preferences: preferences || [],
+          numPeople: numPeople || 1,
+          vegetarian: !!vegetarian,
           userId: session.user!.id,
           hotelData: null,
           flightData: null,
