@@ -17,7 +17,7 @@ import {
   Send,
   StateGraph,
 } from "@langchain/langgraph";
-import { ChatGoogleGenAI } from "@langchain/google-genai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { IDay, WorkerResult } from "./types";
 
 // ─── Tavily helper ────────────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ export function getLLM() {
 
   if (uniqueKeys.length === 0) {
     // Fallback if env is somehow empty, will naturally throw an auth error
-    return new ChatGoogleGenAI({
+    return new ChatGoogleGenerativeAI({
       model: "gemini-2.5-flash",
       temperature: 0.3,
       maxOutputTokens: 8000,
@@ -70,7 +70,7 @@ export function getLLM() {
     });
   }
 
-  const llms = uniqueKeys.map((key) => new ChatGoogleGenAI({
+  const llms = uniqueKeys.map((key) => new ChatGoogleGenerativeAI({
     model: "gemini-2.5-flash",
     apiKey: key,
     temperature: 0.3,
