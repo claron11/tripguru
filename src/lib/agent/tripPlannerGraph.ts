@@ -17,7 +17,7 @@ import {
   Send,
   StateGraph,
 } from "@langchain/langgraph";
-import { ChatGroq } from "@langchain/groq";
+import { ChatGoogleGenAI } from "@langchain/google-genai";
 import { IDay, WorkerResult } from "./types";
 
 // ─── Tavily helper ────────────────────────────────────────────────────────────
@@ -50,31 +50,31 @@ async function tavilySearch(query: string): Promise<string> {
   return `${data.answer || ""}\n\n${snippets}`.trim();
 }
 
-// ─── Groq helper ──────────────────────────────────────────────────────────────
+// ─── Gemini helper ──────────────────────────────────────────────────────────────
 export function getLLM() {
   // Collect all possible keys (support comma-separated and multiple variables)
   const rawKeys = [
-    ...(process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.split(",") : []),
-    ...(process.env.GROQ_API_KEY_2 ? process.env.GROQ_API_KEY_2.split(",") : [])
+    ...(process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.split(",") : []),
+    ...(process.env.GEMINI_API_KEY_2 ? process.env.GEMINI_API_KEY_2.split(",") : [])
   ].map(k => k.trim()).filter(Boolean);
   
   const uniqueKeys = Array.from(new Set(rawKeys));
 
   if (uniqueKeys.length === 0) {
     // Fallback if env is somehow empty, will naturally throw an auth error
-    return new ChatGroq({
-      model: "llama-3.3-70b-versatile",
+    return new ChatGoogleGenAI({
+      model: "gemini-2.5-flash",
       temperature: 0.3,
-      maxTokens: 8000,
+      maxOutputTokens: 8000,
       maxRetries: 2,
     });
   }
 
-  const llms = uniqueKeys.map((key) => new ChatGroq({
-    model: "llama-3.3-70b-versatile",
+  const llms = uniqueKeys.map((key) => new ChatGoogleGenAI({
+    model: "gemini-2.5-flash",
     apiKey: key,
     temperature: 0.3,
-    maxTokens: 8000,
+    maxOutputTokens: 8000,
     maxRetries: 1, // Fail fast to let the fallback mechanism try the next key
   }));
 
@@ -144,15 +144,15 @@ function makeWorker(
       logs.push(`${prefix} ✅ Tavily returned ${data.length} chars`);
     } catch (tavilyErr) {
       logs.push(`${prefix} ⚠️ Tavily failed: ${(tavilyErr as Error).message}`);
-      logs.push(`${prefix} 🤖 Falling back to Groq...`);
-      source = "groq" as any;
+      logs.push(`${prefix} 🤖 Falling back to Gemini...`);
+      source = "gemini" as any;
       try {
         const llm = getLLM();
         const res = await llm.invoke(
           `Research ${category}s for a trip to ${state.destination}. Budget: ${state.currency} ${state.budget}. Dates: ${state.startDate} to ${state.endDate}. Preferences: ${state.preferences.join(", ")}. Return detailed options with names, descriptions, and prices in ${state.currency}.`
         );
         data = typeof res.content === "string" ? res.content : JSON.stringify(res.content);
-        logs.push(`${prefix} ✅ Groq fallback succeeded`);
+        logs.push(`${prefix} ✅ Gemini fallback succeeded`);
       } catch (llmErr) {
         logs.push(`${prefix} ❌ Both failed: ${(llmErr as Error).message}`);
         data = `No ${category} data available`;
@@ -296,7 +296,7 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
 
   try {
     const llm = getLLM();
-    logs.push("[DRAFT AGENT] 📡 Calling Groq API...");
+    logs.push("[DRAFT AGENT] 📡 Calling Gemini API...");
 
     const response = await llm.invoke(prompt);
     const rawText = typeof response.content === "string"
@@ -346,7 +346,7 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
     const is429 = msg.includes("429") || msg.includes("rate_limit") || msg.includes("Too Many Requests") || msg.includes("rate limit");
     const displayMsg = is429 ? "API ERROR - 429" : `API error occurred: ${msg}`;
     
-    logs.push(`[DRAFT AGENT] ❌ Groq error: ${is429 ? "429 Rate Limit" : msg}`);
+    logs.push(`[DRAFT AGENT] ❌ Gemini error: ${is429 ? "429 Rate Limit" : msg}`);
     logs.push("[DRAFT AGENT] 🔄 Generating structured fallback...");
 
     const fallback: IDay[] = Array.from({ length: numDays }, (_, i) => {
