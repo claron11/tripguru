@@ -183,8 +183,6 @@ export default function Timeline({ days, currency = "INR" }: TimelineProps) {
                   </div>
                 </div>
 
-                </div>
-
                 {/* Activities */}
                 <div className="activity-list">
                   {day.activities.map((activity, idx) => {
