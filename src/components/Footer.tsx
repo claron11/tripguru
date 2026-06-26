@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Mail, Phone, Heart, Camera } from "lucide-react";
+import packageJson from "../../package.json";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -62,15 +63,23 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Copyright */}
+        {/* Copyright & Version */}
         <div style={{
           borderTop: "1px solid var(--color-border)",
           paddingTop: "24px",
-          textAlign: "center",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "16px",
           color: "var(--color-text-muted)",
           fontSize: "0.85rem"
         }}>
-          &copy; {currentYear} TripGuru. All rights reserved.
+          <div>&copy; {currentYear} TripGuru. All rights reserved.</div>
+          <div style={{ display: "flex", gap: "16px" }}>
+            <span>Version {packageJson.version}</span>
+            <span>Last Updated: June 27, 2026</span>
+          </div>
         </div>
       </div>
     </footer>
