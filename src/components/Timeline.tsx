@@ -24,7 +24,10 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const straightLine = R * c; 
-  return straightLine * 1.3; // Multiply by 1.3 to approximate road/driving distance
+  const distance = straightLine * 1.3; // Multiply by 1.3 to approximate road/driving distance
+  // Filter absurd distances: if it's over 100km, it's likely a hallucinated coordinate for a local place, or it's an intercity flight.
+  // We'll let the frontend decide if it wants to hide it.
+  return distance;
 }
 
 interface TimelineProps {
@@ -178,7 +181,7 @@ export default function Timeline({ days, currency = "INR" }: TimelineProps) {
                         gap: "4px",
                       }}
                     >
-                      <DollarSign size={12} />
+                      💵
                       {currency} {(day.dailyCost || 0).toLocaleString()}
                     </span>
                   </div>
@@ -189,13 +192,17 @@ export default function Timeline({ days, currency = "INR" }: TimelineProps) {
                   {day.activities.map((activity, idx) => {
                     let distanceStr = null;
                     if (idx > 0 && activity.coordinates && day.activities[idx-1].coordinates) {
+                       const prevCat = day.activities[idx-1].category;
+                       const currCat = activity.category;
                        const dist = calculateDistance(
                          day.activities[idx-1].coordinates!.lat, 
                          day.activities[idx-1].coordinates!.lng, 
                          activity.coordinates!.lat, 
                          activity.coordinates!.lng
                        );
-                       if (dist > 0.1) {
+                       // Strict filter: If distance > 100km and neither is a flight/train, it's probably hallucinated coordinates for a local cafe.
+                       const isLongDistanceTransport = ["flight", "transport"].includes(prevCat) || ["flight", "transport"].includes(currCat);
+                       if (dist > 0.1 && (dist <= 100 || isLongDistanceTransport)) {
                          distanceStr = dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`;
                        }
                     }
@@ -249,15 +256,27 @@ export default function Timeline({ days, currency = "INR" }: TimelineProps) {
                             style={{
                               fontSize: "0.75rem",
                               color: "var(--color-primary)",
-                              marginTop: "3px",
+                              marginTop: "6px",
                               display: "inline-flex",
                               alignItems: "center",
-                              gap: "3px",
+                              gap: "4px",
                               textDecoration: "none",
+                              background: "rgba(26, 86, 219, 0.1)",
+                              padding: "4px 10px",
+                              borderRadius: "12px",
+                              border: "1px solid rgba(26, 86, 219, 0.2)",
+                              fontWeight: 500,
+                              transition: "all 0.2s"
+                            }}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.background = "rgba(26, 86, 219, 0.15)";
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.background = "rgba(26, 86, 219, 0.1)";
                             }}
                           >
-                            <MapPin size={11} />
-                            {activity.location}
+                            <MapPin size={12} />
+                            Open Map
                           </a>
                         )}
                       </div>

@@ -224,10 +224,10 @@ TRIP DETAILS:
 ${feedbackSection}
 
 IMPORTANT BOOKING RULES:
-- For flight recommendations, you MUST include a \`bookingUrl\` to real platforms like MakeMyTrip, Skyscanner, Indigo, or AirIndia.
-- For hotel recommendations, you MUST include a \`bookingUrl\` to trustable platforms like OYO, MakeMyTrip, Agoda, or Booking.com.
-- PRICING: Ensure all prices are HIGHLY REALISTIC for the given currency (${state.currency}). For example, if using INR, flights and hotels usually cost thousands, not hundreds. Do NOT underestimate costs!
-- TRANSPORTATION: If the origin and destination are in the same country or relatively close, prioritize recommending Trains (e.g., IRCTC) or Buses (e.g., RedBus) with connecting routes instead of flights to provide a better local experience.
+- BOOKING LINKS: For flights, set the \`bookingUrl\` to real platforms like IndiGo (https://www.goindigo.in), AirIndia (https://www.airindia.in), Google Flights, or MakeMyTrip. For Buses, use RedBus (https://www.redbus.in) or AbhiBus (https://www.abhibus.com). For Trains, use IRCTC (https://www.irctc.co.in). For hotels, use OYO, Agoda, Booking.com, or MakeMyTrip.
+- PRICING: Estimate EXACT, realistic market prices for flights, buses, and hotels in the given currency (${state.currency}). Do not use generic numbers; provide real estimated market costs for the dates.
+- TRANSPORTATION: If the origin and destination are close, prioritize Trains or Buses with connecting routes.
+- COORDINATES: Provide highly accurate coordinates. If you are not 100% sure about the EXACT latitude/longitude of a specific local place (like a cafe), OMIT the "coordinates" field entirely for that activity so we do not show wrong distances.
 
 RESEARCH DATA:
 HOTELS: ${get("hotel").slice(0, 800)}

@@ -104,7 +104,7 @@ export default function DashboardPage() {
       // Footer
       doc.setTextColor(150, 160, 180);
       doc.setFontSize(10);
-      doc.text(`Page ${pageNum} • Planned by TripGuru`, 105, 290, { align: "center" });
+      doc.text(`Page ${pageNum} • Made by Apoorv`, 105, 290, { align: "center" });
     };
 
     let pageNum = 1;
@@ -157,6 +157,13 @@ export default function DashboardPage() {
         doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
         doc.text(`${act.time} - ${act.name}`, 25, y);
+        
+        // Cost
+        if (act.estimatedCost) {
+          doc.setTextColor(5, 150, 105);
+          doc.text(`${trip.currency} ${act.estimatedCost.toLocaleString()}`, 185, y, { align: "right" });
+        }
+        
         y += 6;
         
         doc.setFontSize(10);
@@ -164,7 +171,18 @@ export default function DashboardPage() {
         doc.setTextColor(80, 90, 110);
         const splitDesc = doc.splitTextToSize(act.description || "", 160);
         doc.text(splitDesc, 25, y);
-        y += (splitDesc.length * 5) + 7;
+        y += (splitDesc.length * 5) + 3;
+
+        // Map location
+        if (act.location) {
+           doc.setTextColor(26, 86, 219);
+           doc.text(`📍 ${act.location}`, 25, y);
+           const linkUrl = act.locationLink || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(act.location)}`;
+           doc.link(25, y - 4, doc.getTextWidth(`📍 ${act.location}`), 5, { url: linkUrl });
+           y += 6;
+        }
+
+        y += 4;
       });
       y += 6;
     });
@@ -352,7 +370,7 @@ export default function DashboardPage() {
                 {/* Card body */}
                 <div className="trip-card-body">
                   <div className="trip-card-stat">
-                    <DollarSign size={15} color="var(--color-primary)" />
+                    💵
                     <span>
                       <strong>{trip.currency} {(trip.totalEstimatedCost ?? trip.budget).toLocaleString()}</strong>
                       <span style={{ color: "var(--color-text-faint)" }}> estimated</span>

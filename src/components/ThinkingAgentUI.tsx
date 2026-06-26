@@ -338,7 +338,7 @@ export default function ThinkingAgentUI({
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>{day.title}</div>
                         <div style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
-                          {day.activities.length} activities · {currency}{" "}
+                          {day.activities.length} activities · 💵 {currency}{" "}
                           {(day.dailyCost || 0).toLocaleString()}
                         </div>
                       </div>
