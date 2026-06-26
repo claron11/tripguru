@@ -27,9 +27,9 @@ export default function LoginPage() {
 
       if (result?.error) {
         setError(result.error);
+        setLoading(false);
       } else {
-        router.push("/plan-trip");
-        router.refresh();
+        window.location.href = "/plan-trip";
       }
     } catch {
       setError("An unexpected error occurred");
