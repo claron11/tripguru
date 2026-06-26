@@ -13,6 +13,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import Timeline from "./Timeline";
+import WeatherWidget from "./WeatherWidget";
 import { IDay } from "@/lib/agent/types";
 
 interface LogEntry {
@@ -295,6 +296,7 @@ export default function ThinkingAgentUI({
                     exit={{ opacity: 0, height: 0 }}
                     style={{ overflow: "hidden" }}
                   >
+                    <WeatherWidget destination={tripData.destination} startDate={tripData.startDate} endDate={tripData.endDate} />
                     <Timeline days={draft} currency={currency} />
                   </motion.div>
                 )}

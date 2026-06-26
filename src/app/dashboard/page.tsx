@@ -17,6 +17,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Timeline from "@/components/Timeline";
+import WeatherWidget from "@/components/WeatherWidget";
 import { IDay } from "@/lib/agent/types";
 import Link from "next/link";
 
@@ -404,6 +405,7 @@ export default function DashboardPage() {
                           background: "var(--color-surface-alt)",
                         }}
                       >
+                        <WeatherWidget destination={trip.destination} startDate={trip.startDate} endDate={trip.endDate} />
                         <Timeline days={days} currency={trip.currency} />
                       </div>
                     </motion.div>
