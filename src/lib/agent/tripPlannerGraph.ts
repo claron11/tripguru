@@ -53,7 +53,7 @@ async function tavilySearch(query: string): Promise<string> {
 // ─── Groq helper ──────────────────────────────────────────────────────────────
 function getLLM() {
   return new ChatGroq({
-    modelName: "llama3-70b-8192",
+    model: "llama3-70b-8192",
     apiKey: process.env.GROQ_API_KEY,
     temperature: 0.3,
   });
