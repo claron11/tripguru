@@ -17,7 +17,7 @@ const features = [
   {
     icon: <Map size={24} />,
     title: "Smart Itinerary Synthesis",
-    desc: "Gemini 2.5 Flash weaves all research into a coherent, budget-aware day-by-day plan.",
+    desc: "Gemini 1.5 Flash weaves all research into a coherent, budget-aware day-by-day plan.",
   },
   {
     icon: <Shield size={24} />,
@@ -39,7 +39,7 @@ export default function HomePage() {
         <div className="hero-content">
           <div className="hero-eyebrow">
             <Sparkles size={14} />
-            Powered by Gemini 2.5 Flash & LangGraph
+            Powered by Gemini 1.5 Flash & LangGraph
           </div>
 
           <h1>

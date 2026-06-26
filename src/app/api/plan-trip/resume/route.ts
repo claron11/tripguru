@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
           const config = { configurable: { thread_id: threadId } };
 
           sendEvent({ type: "log", message: `[REVISION] 🔄 Incorporating your feedback...` });
-          sendEvent({ type: "node", node: "draftAgent", message: "🧠 Re-generating with Gemini 2.5 Flash..." });
+          sendEvent({ type: "node", node: "draftAgent", message: "🧠 Re-generating with Gemini 1.5 Flash..." });
 
           // Resume the interrupted graph with human input
           const graphStream = tripPlannerGraph.stream(

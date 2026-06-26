@@ -53,7 +53,7 @@ async function tavilySearch(query: string): Promise<string> {
 // ─── Gemini helper ────────────────────────────────────────────────────────────
 function getGemini() {
   return new ChatGoogleGenerativeAI({
-    model: "gemini-2.5-flash",
+    model: "gemini-1.5-flash",
     apiKey: process.env.GEMINI_API_KEY,
     temperature: 0.3,
   });
@@ -193,7 +193,7 @@ async function aggregatorNode(state: TripStateType): Promise<Partial<TripStateTy
 
 // ─── Draft Agent (1x Gemini call) ─────────────────────────────────────────────
 async function draftAgentNode(state: TripStateType): Promise<Partial<TripStateType>> {
-  const logs = ["[DRAFT AGENT] 🧠 Synthesizing all research with Gemini 2.5 Flash..."];
+  const logs = ["[DRAFT AGENT] 🧠 Synthesizing all research with Gemini 1.5 Flash..."];
 
   const startDate = new Date(state.startDate);
   const endDate   = new Date(state.endDate);
@@ -255,7 +255,7 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
 
   try {
     const gemini = getGemini();
-    logs.push("[DRAFT AGENT] 📡 Calling Gemini 2.5 Flash API...");
+    logs.push("[DRAFT AGENT] 📡 Calling Gemini 1.5 Flash API...");
 
     const response = await gemini.invoke(prompt);
     const rawText = typeof response.content === "string"

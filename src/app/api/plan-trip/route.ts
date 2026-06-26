@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
                 flightWorker:      "✈️  Flight agent searching via Tavily...",
                 restaurantWorker:  "🍽️  Restaurant agent searching via Tavily...",
                 attractionWorker:  "🗺️  Attraction agent searching via Tavily...",
-                draftAgent:        "🧠 Draft agent synthesizing with Gemini 2.5 Flash...",
+                draftAgent:        "🧠 Draft agent synthesizing with Gemini 1.5 Flash...",
                 humanReview:       "⏸️  Pausing for human review...",
               };
               if (nodeLabels[nodeName]) {
