@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getLLM } from "@/lib/agent/llm";
+import { getLLM } from "@/lib/agent/tripPlannerGraph";
 
 export const dynamic = "force-dynamic";
 
