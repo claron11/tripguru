@@ -41,8 +41,10 @@ export async function GET(request: Request) {
     }
 
     // 3. AI Packing Tips
-    const llm = getLLM();
-    const prompt = `You are an expert travel assistant.
+    let packingTips = "Smart packing tips are temporarily unavailable (API Rate Limit). But the weather forecast above is ready!";
+    try {
+      const llm = getLLM();
+      const prompt = `You are an expert travel assistant.
 Destination: ${destination}
 Trip Dates: ${startDate || "Upcoming"} to ${endDate || "Upcoming"}
 Recent Weather Forecast: ${weatherSummary}
@@ -50,8 +52,14 @@ Recent Weather Forecast: ${weatherSummary}
 Based on the destination, the trip dates (consider historical climate if dates are far in the future, otherwise use the recent forecast), give a short, punchy weather expectation and 3-4 bullet points of essential packing tips.
 Make it conversational and helpful. Keep it extremely brief (max 60 words). Do not include any intro/outro. Use emojis.`;
 
-    const res = await llm.invoke(prompt);
-    const packingTips = typeof res.content === "string" ? res.content : JSON.stringify(res.content);
+      const res = await llm.invoke(prompt);
+      packingTips = typeof res.content === "string" ? res.content : JSON.stringify(res.content);
+    } catch (llmErr: any) {
+      console.error("Weather AI Error:", llmErr.message);
+      if (llmErr.message.includes("429") || llmErr.message.includes("rate_limit")) {
+        packingTips = "❌ API ERROR - 429: AI packing tips temporarily unavailable due to rate limits. Please try again later.";
+      }
+    }
 
     return NextResponse.json({
       location: resolvedName,
@@ -63,6 +71,6 @@ Make it conversational and helpful. Keep it extremely brief (max 60 words). Do n
 
   } catch (err: any) {
     console.error("Weather API Error:", err);
-    return NextResponse.json({ error: "Failed to fetch weather data" }, { status: 500 });
+    return NextResponse.json({ error: `Failed to fetch weather data: ${err.message}` }, { status: 500 });
   }
 }
