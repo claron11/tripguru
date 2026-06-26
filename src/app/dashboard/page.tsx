@@ -160,19 +160,19 @@ export default function DashboardPage() {
       
       // Day Header (Elegant Block)
       doc.setFillColor(surfaceAlt[0], surfaceAlt[1], surfaceAlt[2]); // light blue bg
-      doc.rect(marginL, y, contentW, 14, 'F');
+      doc.rect(marginL, y, contentW, 12, 'F');
       doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]); // dark blue accent left
-      doc.rect(marginL, y, 4, 14, 'F');
+      doc.rect(marginL, y, 4, 12, 'F');
       
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.setFontSize(12);
+      doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text(`DAY ${day.day} - ${day.title.toUpperCase()}`, marginL + 10, y + 9);
-      y += 22;
+      doc.text(`DAY ${day.day} - ${day.title.toUpperCase()}`, marginL + 10, y + 8);
+      y += 18;
       
       day.activities.forEach((act, index) => {
         // Strict page break to prevent footer overlap
-        if (y > 245) {
+        if (y > 255) {
           doc.addPage();
           pageNum++;
           drawPageDesign(pageNum);
@@ -183,10 +183,10 @@ export default function DashboardPage() {
         
         // Draw timeline dot
         doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.circle(marginL + 2, y - 2, 1.5, 'F');
+        doc.circle(marginL + 2, y - 1.5, 1.5, 'F');
         
         doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-        doc.setFontSize(12);
+        doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
         doc.text(`${act.time} - ${act.name}`, marginL + 8, y);
         
@@ -196,43 +196,44 @@ export default function DashboardPage() {
           doc.text(`${trip.currency} ${act.estimatedCost.toLocaleString()}`, marginR, y, { align: "right" });
         }
         
-        y += 6;
+        y += 5;
         
         // Description
-        doc.setFontSize(10);
+        doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(80, 90, 110);
         const splitDesc = doc.splitTextToSize(act.description || "", contentW - 8);
         doc.text(splitDesc, marginL + 8, y);
-        y += (splitDesc.length * 5) + 3;
+        y += (splitDesc.length * 4) + 2;
 
         // Map location
         if (act.location) {
            doc.setFillColor(245, 248, 250);
-           doc.roundedRect(marginL + 8, y - 4, contentW - 8, 8, 1, 1, 'F');
+           doc.roundedRect(marginL + 8, y - 3, contentW - 8, 6, 1, 1, 'F');
            
            doc.setTextColor(26, 86, 219);
            doc.setFont("helvetica", "bold");
-           doc.setFontSize(9);
-           doc.text(`[VIEW MAP]`, marginL + 12, y + 1);
+           doc.setFontSize(8);
+           doc.text(`[VIEW MAP]`, marginL + 11, y + 1.5);
            
            doc.setFont("helvetica", "normal");
            doc.setTextColor(100, 110, 130);
-           doc.text(` - ${act.location}`, marginL + 14 + doc.getTextWidth(`[VIEW MAP]`), y + 1);
+           doc.text(` - ${act.location}`, marginL + 13 + doc.getTextWidth(`[VIEW MAP]`), y + 1.5);
            
            const linkUrl = act.locationLink || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(act.location)}`;
-           doc.link(marginL + 8, y - 4, contentW - 8, 8, { url: linkUrl });
-           y += 8;
+           doc.link(marginL + 8, y - 3, contentW - 8, 6, { url: linkUrl });
+           y += 5;
         }
 
-        y += 6;
+        y += 4;
         
         // Connect the timeline dot dynamically based on exact height
         if (index !== day.activities.length - 1) {
           doc.setDrawColor(220, 225, 235);
           doc.setLineWidth(0.4);
-          doc.line(marginL + 2, startY + 2, marginL + 2, y - 5);
+          doc.line(marginL + 2, startY + 2, marginL + 2, y - 4);
         }
+
       });
       y += 8;
     });
