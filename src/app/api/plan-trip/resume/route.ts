@@ -101,7 +101,12 @@ export async function POST(req: NextRequest) {
             });
           }
         } catch (err) {
-          sendEvent({ type: "error", message: `❌ Revision error: ${(err as Error).message}` });
+          const msg = (err as Error).message || "Unknown error";
+          if (msg.includes("429") || msg.includes("rate_limit") || msg.includes("Too Many Requests") || msg.includes("rate limit")) {
+            sendEvent({ type: "error", message: "❌ API ERROR - 429" });
+          } else {
+            sendEvent({ type: "error", message: `❌ Revision error: ${msg}` });
+          }
         } finally {
           controller.close();
         }
