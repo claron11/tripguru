@@ -254,6 +254,10 @@ RESPOND WITH ONLY VALID JSON — NO MARKDOWN, NO EXPLANATION:
           "description": "2-3 sentence description",
           "location": "Specific place/address",
           "locationLink": "Google Maps search URL (e.g. https://www.google.com/maps/search/?api=1&query=LOCATION)",
+          "coordinates": {
+            "lat": <number>,
+            "lng": <number>
+          },
           "estimatedCost": <number>,
           "currency": "${state.currency}",
           "category": "hotel|flight|restaurant|attraction|transport|other",

@@ -10,6 +10,7 @@ export interface IActivity {
   currency: string;
   category: "hotel" | "flight" | "restaurant" | "attraction" | "transport" | "other";
   bookingUrl?: string;
+  coordinates?: { lat: number; lng: number };
 }
 
 export interface IDay {

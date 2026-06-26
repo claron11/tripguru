@@ -1,7 +1,13 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
 import { IDay, IActivity } from "@/lib/agent/types";
+
+const RouteMap = dynamic(() => import("./RouteMap"), { 
+  ssr: false, 
+  loading: () => <div style={{ height: "300px", width: "100%", background: "var(--bg-secondary)", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px" }}><span className="spinner"></span></div> 
+});
 import {
   Hotel,
   Plane,
@@ -170,6 +176,9 @@ export default function Timeline({ days, currency = "INR" }: TimelineProps) {
                     </span>
                   </div>
                 </div>
+
+                {/* Day Route Map */}
+                <RouteMap activities={day.activities} />
 
                 {/* Activities */}
                 <div className="activity-list">
