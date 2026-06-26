@@ -77,46 +77,98 @@ export default function DashboardPage() {
     const { jsPDF } = await import("jspdf");
     const doc = new jsPDF();
     
-    let y = 20;
-    doc.setFontSize(20);
+    const primaryColor = [26, 86, 219]; // #1A56DB
+    const surfaceAlt = [240, 247, 255]; // #F0F7FF
+    const textColor = [30, 41, 59]; // #1E293B
+    
+    const drawPageDesign = (pageNum: number) => {
+      // Full page soft background
+      doc.setFillColor(surfaceAlt[0], surfaceAlt[1], surfaceAlt[2]);
+      doc.rect(0, 0, 210, 297, 'F');
+      
+      // Top Brand Header
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.rect(0, 0, 210, 32, 'F');
+      
+      // Branding text
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont("helvetica", "bold");
+      doc.text("TripGuru", 20, 20);
+      
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text("Your Ultimate AI Travel Companion", 20, 27);
+      
+      // Footer
+      doc.setTextColor(150, 160, 180);
+      doc.setFontSize(10);
+      doc.text(`Page ${pageNum} • Planned by TripGuru`, 105, 290, { align: "center" });
+    };
+
+    let pageNum = 1;
+    drawPageDesign(pageNum);
+    
+    let y = 48;
+    
+    // Trip Title
+    doc.setFontSize(24);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.text(`Trip to ${trip.destination}`, 20, y);
     y += 10;
+    
+    // Trip Metadata
     doc.setFontSize(12);
-    doc.setTextColor(100);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 110, 130);
     doc.text(`${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}`, 20, y);
-    y += 10;
+    y += 7;
     doc.text(`Estimated Cost: ${trip.currency} ${trip.totalEstimatedCost ?? trip.budget}`, 20, y);
-    y += 15;
-
-    doc.setTextColor(0);
+    y += 16;
+    
     days.forEach((day) => {
-      if (y > 270) {
+      if (y > 260) {
         doc.addPage();
-        y = 20;
+        pageNum++;
+        drawPageDesign(pageNum);
+        y = 48;
       }
-      doc.setFontSize(16);
-      doc.text(`Day ${day.day}: ${day.title} (${day.date})`, 20, y);
-      y += 10;
+      
+      // Day Header (pill shape)
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.roundedRect(20, y - 7, 170, 12, 3, 3, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Day ${day.day} - ${day.title} (${day.date})`, 25, y + 1);
+      y += 12;
       
       day.activities.forEach((act) => {
-        if (y > 280) {
+        if (y > 275) {
           doc.addPage();
-          y = 20;
+          pageNum++;
+          drawPageDesign(pageNum);
+          y = 48;
         }
-        doc.setFontSize(12);
-        doc.text(`• ${act.time} - ${act.name}`, 25, y);
-        y += 7;
+        
+        doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text(`${act.time} - ${act.name}`, 25, y);
+        y += 6;
+        
         doc.setFontSize(10);
-        doc.setTextColor(80);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(80, 90, 110);
         const splitDesc = doc.splitTextToSize(act.description || "", 160);
-        doc.text(splitDesc, 30, y);
-        y += (splitDesc.length * 5) + 5;
-        doc.setTextColor(0);
+        doc.text(splitDesc, 25, y);
+        y += (splitDesc.length * 5) + 7;
       });
-      y += 5;
+      y += 6;
     });
 
-    doc.save(`Trip_to_${trip.destination.replace(/[^a-z0-9]/gi, '_')}.pdf`);
+    doc.save(`TripGuru_${trip.destination.replace(/[^a-z0-9]/gi, '_')}.pdf`);
   };
 
   const deleteTrip = async (tripId: string) => {
