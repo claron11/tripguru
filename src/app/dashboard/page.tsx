@@ -95,24 +95,31 @@ export default function DashboardPage() {
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(20);
       doc.setFont("helvetica", "bold");
-      doc.text("TripGuru", 20, 15);
+      doc.text("TripGuru", 14, 15);
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      doc.text("Your Ultimate AI Travel Companion", 20, 21);
+      doc.text("Your Ultimate AI Travel Companion", 14, 21);
       
-      // Footer
-      doc.setTextColor(150, 160, 180);
-      doc.setFontSize(10);
-      doc.text(`Page ${pageNum} • Made by Apoorv`, 105, 290, { align: "center" });
+      // Footer (Elegant layout)
+      doc.setDrawColor(225, 230, 240);
+      doc.setLineWidth(0.4);
+      doc.line(14, 285, 196, 285);
+      
+      doc.setTextColor(130, 140, 160);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "italic");
+      doc.text(`Page ${pageNum}`, 14, 291);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Made by Apoorv`, 196, 291, { align: "right" });
     };
 
     let pageNum = 1;
     drawPageDesign(pageNum);
     
-    let y = 45;
-    const marginL = 20;
-    const marginR = 190;
+    let y = 40;
+    const marginL = 14;
+    const marginR = 196;
     const contentW = marginR - marginL;
     
     // Trip Title
@@ -134,20 +141,21 @@ export default function DashboardPage() {
     doc.text(`BUDGET: `, marginL, y);
     doc.setFont("helvetica", "normal");
     doc.text(`${trip.currency} ${trip.totalEstimatedCost ?? trip.budget}`, marginL + 19, y);
-    y += 15;
+    y += 12;
     
     // Draw a subtle line separator
     doc.setDrawColor(220, 225, 235);
     doc.setLineWidth(0.5);
     doc.line(marginL, y, marginR, y);
-    y += 12;
+    y += 10;
     
     days.forEach((day) => {
-      if (y > 260) {
+      // Check page break before Day header
+      if (y > 240) {
         doc.addPage();
         pageNum++;
         drawPageDesign(pageNum);
-        y = 45;
+        y = 40;
       }
       
       // Day Header (Elegant Block)
@@ -162,15 +170,18 @@ export default function DashboardPage() {
       doc.text(`DAY ${day.day} - ${day.title.toUpperCase()}`, marginL + 10, y + 9);
       y += 22;
       
-      day.activities.forEach((act) => {
-        if (y > 275) {
+      day.activities.forEach((act, index) => {
+        // Strict page break to prevent footer overlap
+        if (y > 245) {
           doc.addPage();
           pageNum++;
           drawPageDesign(pageNum);
-          y = 45;
+          y = 40;
         }
         
-        // Draw timeline dot & line
+        const startY = y;
+        
+        // Draw timeline dot
         doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.circle(marginL + 2, y - 2, 1.5, 'F');
         
@@ -195,7 +206,7 @@ export default function DashboardPage() {
         doc.text(splitDesc, marginL + 8, y);
         y += (splitDesc.length * 5) + 3;
 
-        // Map location (Sleek Box style)
+        // Map location
         if (act.location) {
            doc.setFillColor(245, 248, 250);
            doc.roundedRect(marginL + 8, y - 4, contentW - 8, 8, 1, 1, 'F');
@@ -207,7 +218,7 @@ export default function DashboardPage() {
            
            doc.setFont("helvetica", "normal");
            doc.setTextColor(100, 110, 130);
-           doc.text(`- ${act.location}`, marginL + 12 + doc.getTextWidth(`[VIEW MAP]`), y + 1);
+           doc.text(` - ${act.location}`, marginL + 14 + doc.getTextWidth(`[VIEW MAP]`), y + 1);
            
            const linkUrl = act.locationLink || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(act.location)}`;
            doc.link(marginL + 8, y - 4, contentW - 8, 8, { url: linkUrl });
@@ -216,10 +227,12 @@ export default function DashboardPage() {
 
         y += 6;
         
-        // Draw timeline connector line if not last (approximation)
-        doc.setDrawColor(220, 225, 235);
-        doc.setLineWidth(0.3);
-        doc.line(marginL + 2, y - 30, marginL + 2, y - 8);
+        // Connect the timeline dot dynamically based on exact height
+        if (index !== day.activities.length - 1) {
+          doc.setDrawColor(220, 225, 235);
+          doc.setLineWidth(0.4);
+          doc.line(marginL + 2, startY + 2, marginL + 2, y - 5);
+        }
       });
       y += 8;
     });
