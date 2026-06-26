@@ -89,17 +89,17 @@ export default function DashboardPage() {
       
       // Top Brand Header
       doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.rect(0, 0, 210, 32, 'F');
+      doc.rect(0, 0, 210, 24, 'F');
       
       // Branding text
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(22);
+      doc.setFontSize(20);
       doc.setFont("helvetica", "bold");
-      doc.text("TripGuru", 20, 20);
+      doc.text("TripGuru", 20, 15);
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      doc.text("Your Ultimate AI Travel Companion", 20, 27);
+      doc.text("Your Ultimate AI Travel Companion", 20, 21);
       
       // Footer
       doc.setTextColor(150, 160, 180);
@@ -176,9 +176,14 @@ export default function DashboardPage() {
         // Map location
         if (act.location) {
            doc.setTextColor(26, 86, 219);
-           doc.text(`📍 ${act.location}`, 25, y);
+           doc.setFont("helvetica", "bold");
+           doc.text(`[View on Map]`, 25, y);
+           doc.setFont("helvetica", "normal");
+           doc.setTextColor(100, 110, 130);
+           doc.text(` - ${act.location}`, 25 + doc.getTextWidth(`[View on Map]`), y);
+           
            const linkUrl = act.locationLink || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(act.location)}`;
-           doc.link(25, y - 4, doc.getTextWidth(`📍 ${act.location}`), 5, { url: linkUrl });
+           doc.link(25, y - 4, doc.getTextWidth(`[View on Map]`), 5, { url: linkUrl });
            y += 6;
         }
 
