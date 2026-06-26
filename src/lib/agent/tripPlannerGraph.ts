@@ -298,7 +298,7 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
           {
             time: "09:00",
             name: "Morning exploration",
-            description: `Explore ${state.destination} — API error occurred: ${msg.slice(0, 100)}`,
+            description: `Explore ${state.destination} — API error occurred: ${msg}`,
             location: state.destination,
             locationLink: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(state.destination)}`,
             estimatedCost: Math.round(state.budget / numDays),
