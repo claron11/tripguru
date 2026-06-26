@@ -277,7 +277,22 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
 
     const parsed = JSON.parse(jsonStr);
     const days: IDay[] = parsed.days || [];
-    const totalEstimatedCost: number = parsed.totalEstimatedCost || state.budget;
+    
+    // Dynamically calculate total cost rather than trusting LLM math
+    let computedTotalCost = 0;
+    days.forEach(day => {
+      day.activities?.forEach(act => {
+        if (typeof act.estimatedCost === "string") {
+          const numStr = (act.estimatedCost as string).replace(/[^0-9.]/g, "");
+          act.estimatedCost = numStr ? Math.round(parseFloat(numStr)) : 0;
+        } else if (typeof act.estimatedCost !== "number") {
+          act.estimatedCost = 0;
+        }
+        computedTotalCost += act.estimatedCost;
+      });
+    });
+
+    const totalEstimatedCost: number = computedTotalCost > 0 ? computedTotalCost : state.budget;
 
     logs.push(`[DRAFT AGENT] ✅ Generated ${days.length}-day itinerary`);
     logs.push(`[DRAFT AGENT] 💰 Total: ${state.currency} ${totalEstimatedCost}`);
