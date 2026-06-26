@@ -235,7 +235,7 @@ export default function DashboardPage() {
         }
 
       });
-      y += 8;
+      y += 1;
     });
 
     doc.save(`TripGuru_${trip.destination.replace(/[^a-z0-9]/gi, '_')}.pdf`);
