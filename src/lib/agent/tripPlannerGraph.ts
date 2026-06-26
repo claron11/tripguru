@@ -19,6 +19,7 @@ import {
 } from "@langchain/langgraph";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { IDay, WorkerResult } from "./types";
+import { z } from "zod";
 
 // ─── Tavily helper ────────────────────────────────────────────────────────────
 async function tavilySearch(query: string): Promise<string> {
@@ -298,24 +299,34 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
     const llm = getLLM();
     logs.push("[DRAFT AGENT] 📡 Calling Gemini API...");
 
-    const response = await llm.invoke(prompt);
-    const rawText = typeof response.content === "string"
-      ? response.content
-      : JSON.stringify(response.content);
+    const activitySchema = z.object({
+      time: z.string(),
+      name: z.string(),
+      description: z.string(),
+      location: z.string(),
+      locationLink: z.string().optional(),
+      coordinates: z.object({ lat: z.number(), lng: z.number() }).optional(),
+      estimatedCost: z.union([z.number(), z.string()]),
+      currency: z.string(),
+      category: z.enum(["hotel", "flight", "restaurant", "attraction", "transport", "other"]),
+      bookingUrl: z.string().optional()
+    });
 
-    // Strip markdown code fences if present
-    const cleaned = rawText
-      .replace(/```json\s*/gi, "")
-      .replace(/```\s*/g, "")
-      .trim();
+    const responseSchema = z.object({
+      totalEstimatedCost: z.number(),
+      days: z.array(z.object({
+        day: z.number(),
+        date: z.string(),
+        title: z.string(),
+        dailyCost: z.number(),
+        activities: z.array(activitySchema)
+      }))
+    });
 
-    // Find the JSON object boundaries
-    const jsonStart = cleaned.indexOf("{");
-    const jsonEnd   = cleaned.lastIndexOf("}");
-    const jsonStr   = cleaned.slice(jsonStart, jsonEnd + 1);
-
-    const parsed = JSON.parse(jsonStr);
-    const days: IDay[] = parsed.days || [];
+    const structuredLlm = llm.withStructuredOutput(responseSchema, { name: "trip_itinerary" });
+    const parsed = await structuredLlm.invoke(prompt);
+    
+    const days: IDay[] = parsed.days as IDay[] || [];
     
     // Dynamically calculate total cost rather than trusting LLM math
     let computedTotalCost = 0;
