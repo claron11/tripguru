@@ -66,6 +66,7 @@ export function getLLM(schema?: any, schemaName?: string): any {
     let base: any = new ChatGroq({
       model: "llama-3.3-70b-versatile",
       temperature: 0.3,
+      maxTokens: 8000,
       maxRetries: 2,
     });
     if (schema) base = base.withStructuredOutput(schema, schemaName ? { name: schemaName } : undefined);
@@ -77,6 +78,7 @@ export function getLLM(schema?: any, schemaName?: string): any {
       model: "llama-3.3-70b-versatile",
       apiKey: key,
       temperature: 0.3,
+      maxTokens: 8000,
       maxRetries: 1, // Fail fast to let the fallback mechanism try the next key
     });
     if (schema) base = base.withStructuredOutput(schema, schemaName ? { name: schemaName } : undefined);
