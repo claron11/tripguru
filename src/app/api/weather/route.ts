@@ -37,7 +37,7 @@ export async function GET(request: Request) {
       const maxTemp = Math.max(...weatherData.daily.temperature_2m_max);
       const minTemp = Math.min(...weatherData.daily.temperature_2m_min);
       const precip = weatherData.daily.precipitation_sum.reduce((a: number, b: number) => a + b, 0);
-      weatherSummary = `In the upcoming 7 days, ${resolvedName} expects temps from ${minTemp}°C to ${maxTemp}°C with a total of ${precip}mm of rain.`;
+      weatherSummary = `In the upcoming 7 days, ${resolvedName} expects temps from ${minTemp}°C to ${maxTemp}°C with a total of ${precip.toFixed(1)}mm of rain.`;
     }
 
     // 3. AI Packing Tips
