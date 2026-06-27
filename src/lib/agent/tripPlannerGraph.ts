@@ -75,7 +75,7 @@ export function getLLM(schema?: any, schemaName?: string): any {
 
   const llms = uniqueKeys.map((key) => {
     let base: any = new ChatGoogleGenerativeAI({
-      model: "gemini-2.5-flash",
+      model: "gemini-1.5-flash",
       apiKey: key,
       temperature: 0.3,
       maxOutputTokens: 8000,
@@ -229,7 +229,7 @@ async function aggregatorNode(state: TripStateType): Promise<Partial<TripStateTy
 
 // ─── Draft Agent (1x Groq call) ───────────────────────────────────────────────
 async function draftAgentNode(state: TripStateType): Promise<Partial<TripStateType>> {
-  const logs = ["[DRAFT AGENT] 🧠 Synthesizing all research with Groq (Llama 3)..."];
+  const logs = ["[DRAFT AGENT] 🧠 Synthesizing all research with Gemini..."];
 
   const startDate = new Date(state.startDate);
   const endDate   = new Date(state.endDate);
@@ -270,36 +270,7 @@ RESTAURANTS: ${get("restaurant").slice(0, 800)}
 
 ATTRACTIONS: ${get("attraction").slice(0, 800)}
 
-RESPOND WITH ONLY VALID JSON — NO MARKDOWN, NO EXPLANATION:
-{
-  "totalEstimatedCost": <number>,
-  "days": [
-    {
-      "day": 1,
-      "date": "${state.startDate}",
-      "title": "Arrival & First Impressions",
-      "dailyCost": <number>,
-      "activities": [
-        {
-          "time": "09:00",
-          "name": "Activity name",
-          "description": "2-3 sentence description",
-          "location": "Specific place/address",
-          "locationLink": "Google Maps search URL (e.g. https://www.google.com/maps/search/?api=1&query=LOCATION)",
-          "coordinates": {
-            "lat": <number>,
-            "lng": <number>
-          },
-          "estimatedCost": <number>,
-          "currency": "${state.currency}",
-          "category": "hotel|flight|restaurant|attraction|transport|other",
-          "bookingUrl": ""
-        }
-      ]
-    }
-  ]
-}
-Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/afternoon/evening. Include hotel check-in on day 1, flight on day 1 and last day. Costs must sum close to ${state.budget}. Return ONLY the JSON object.`;
+Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/afternoon/evening. Include hotel check-in on day 1, flight on day 1 and last day. Costs must sum close to ${state.budget}. Return ONLY the JSON object matching the requested schema.`;
 
   try {
 
@@ -310,7 +281,7 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
       location: z.string(),
       locationLink: z.string().optional(),
       coordinates: z.object({ lat: z.number(), lng: z.number() }).optional(),
-      estimatedCost: z.union([z.number(), z.string()]),
+      estimatedCost: z.number(),
       currency: z.string(),
       category: z.enum(["hotel", "flight", "restaurant", "attraction", "transport", "other"]),
       bookingUrl: z.string().optional()
