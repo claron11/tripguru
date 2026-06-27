@@ -24,7 +24,7 @@ export interface IDay {
 export interface WorkerResult {
   category: "hotel" | "flight" | "restaurant" | "attraction";
   data: string;
-  source: "tavily" | "gemini";
+  source: "tavily" | "groq";
   error?: string;
 }
 
