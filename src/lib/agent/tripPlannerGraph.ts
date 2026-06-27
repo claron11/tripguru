@@ -254,7 +254,7 @@ TRIP DETAILS:
 ${feedbackSection}
 
 IMPORTANT BOOKING RULES:
-- BOOKING LINKS: For flights, set the \`bookingUrl\` to real platforms like IndiGo (https://www.goindigo.in), AirIndia (https://www.airindia.in), Google Flights, or MakeMyTrip. For Buses, use RedBus (https://www.redbus.in) or AbhiBus (https://www.abhibus.com). For Trains, use IRCTC (https://www.irctc.co.in). For hotels, use OYO, Agoda, Booking.com, or MakeMyTrip.
+- BOOKING LINKS: The \`bookingUrl\` field MUST be a valid and complete HTTPS URL starting with "https://". For flights, use https://www.makemytrip.com/flights/, https://www.goindigo.in, or https://www.airindia.in. For Buses, use https://www.redbus.in or https://www.abhibus.com. For Trains, use https://www.irctc.co.in. For hotels, use https://www.makemytrip.com/hotels/, https://www.agoda.com, or https://www.cleartrip.com. DO NOT leave it blank for hotels and transport.
 - LOCATION LINKS: The \`locationLink\` MUST ALWAYS be a valid Google Maps search URL (e.g., https://www.google.com/maps/search/?api=1&query=PLACE_NAME). NEVER use TripAdvisor or any other website for locationLink.
 - PRICING: Estimate EXACT, realistic market prices for flights, buses, and hotels in the given currency (${state.currency}). Do not use generic numbers; provide real estimated market costs for the dates.
 - TRANSPORTATION: If the origin and destination are close, prioritize Trains or Buses with connecting routes.
