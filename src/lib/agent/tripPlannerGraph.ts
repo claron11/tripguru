@@ -64,7 +64,7 @@ export function getLLM(schema?: any, schemaName?: string): any {
   if (uniqueKeys.length === 0) {
     // Fallback if env is somehow empty, will naturally throw an auth error
     let base: any = new ChatGroq({
-      modelName: "llama3-70b-8192",
+      model: "llama3-70b-8192",
       temperature: 0.3,
       maxRetries: 2,
     });
@@ -74,7 +74,7 @@ export function getLLM(schema?: any, schemaName?: string): any {
 
   const llms = uniqueKeys.map((key) => {
     let base: any = new ChatGroq({
-      modelName: "llama3-70b-8192",
+      model: "llama3-70b-8192",
       apiKey: key,
       temperature: 0.3,
       maxRetries: 1, // Fail fast to let the fallback mechanism try the next key
