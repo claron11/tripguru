@@ -268,7 +268,9 @@ RESTAURANTS: ${get("restaurant").slice(0, 800)}
 
 ATTRACTIONS: ${get("attraction").slice(0, 800)}
 
-Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/afternoon/evening. Include hotel check-in on day 1, flight on day 1 and last day. Costs must sum close to ${state.budget}. Return ONLY the JSON object matching the requested schema.`;
+Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/afternoon/evening. Include hotel check-in on day 1, flight on day 1 and last day. Costs must sum close to ${state.budget}. 
+ACTIVITY DESCRIPTIONS: Ensure every activity's "description" field is detailed and engaging, spanning at least 2 to 3 full sentences (approx 30-40 words). Do not write short 1-liners.
+Return ONLY the JSON object matching the requested schema.`;
 
   try {
 
