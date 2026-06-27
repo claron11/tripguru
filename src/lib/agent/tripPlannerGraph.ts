@@ -17,7 +17,7 @@ import {
   Send,
   StateGraph,
 } from "@langchain/langgraph";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatGroq } from "@langchain/groq";
 import { IDay, WorkerResult } from "./types";
 import { z } from "zod";
 
@@ -51,22 +51,21 @@ async function tavilySearch(query: string): Promise<string> {
   return `${data.answer || ""}\n\n${snippets}`.trim();
 }
 
-// ─── Gemini helper ──────────────────────────────────────────────────────────────
+// ─── Groq helper ──────────────────────────────────────────────────────────────
 export function getLLM(schema?: any, schemaName?: string): any {
   // Collect all possible keys (support comma-separated and multiple variables)
   const rawKeys = [
-    ...(process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.split(",") : []),
-    ...(process.env.GEMINI_API_KEY_2 ? process.env.GEMINI_API_KEY_2.split(",") : [])
+    ...(process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.split(",") : []),
+    ...(process.env.GROQ_API_KEY_2 ? process.env.GROQ_API_KEY_2.split(",") : [])
   ].map(k => k.trim()).filter(Boolean);
   
   const uniqueKeys = Array.from(new Set(rawKeys));
 
   if (uniqueKeys.length === 0) {
     // Fallback if env is somehow empty, will naturally throw an auth error
-    let base: any = new ChatGoogleGenerativeAI({
-      model: "gemini-2.5-flash",
+    let base: any = new ChatGroq({
+      modelName: "llama3-70b-8192",
       temperature: 0.3,
-      maxOutputTokens: 8000,
       maxRetries: 2,
     });
     if (schema) base = base.withStructuredOutput(schema, schemaName ? { name: schemaName } : undefined);
@@ -74,11 +73,10 @@ export function getLLM(schema?: any, schemaName?: string): any {
   }
 
   const llms = uniqueKeys.map((key) => {
-    let base: any = new ChatGoogleGenerativeAI({
-      model: "gemini-2.5-flash",
+    let base: any = new ChatGroq({
+      modelName: "llama3-70b-8192",
       apiKey: key,
       temperature: 0.3,
-      maxOutputTokens: 8000,
       maxRetries: 1, // Fail fast to let the fallback mechanism try the next key
     });
     if (schema) base = base.withStructuredOutput(schema, schemaName ? { name: schemaName } : undefined);
@@ -144,22 +142,22 @@ function makeWorker(
     const logs: string[] = [`${prefix} 🔍 Searching: "${query.slice(0, 80)}..."`];
 
     let data = "";
-    let source: "tavily" | "gemini" = "tavily";
+    let source: "tavily" | "groq" = "tavily";
 
     try {
       data = await tavilySearch(query);
       logs.push(`${prefix} ✅ Tavily returned ${data.length} chars`);
     } catch (tavilyErr) {
       logs.push(`${prefix} ⚠️ Tavily failed: ${(tavilyErr as Error).message}`);
-      logs.push(`${prefix} 🤖 Falling back to Gemini...`);
-      source = "gemini" as any;
+      logs.push(`${prefix} 🤖 Falling back to Groq...`);
+      source = "groq" as any;
       try {
         const llm = getLLM();
         const res = await llm.invoke(
           `Research ${category}s for a trip to ${state.destination}. Budget: ${state.currency} ${state.budget}. Dates: ${state.startDate} to ${state.endDate}. Preferences: ${state.preferences.join(", ")}. Return detailed options with names, descriptions, and prices in ${state.currency}.`
         );
         data = typeof res.content === "string" ? res.content : JSON.stringify(res.content);
-        logs.push(`${prefix} ✅ Gemini fallback succeeded`);
+        logs.push(`${prefix} ✅ Groq fallback succeeded`);
       } catch (llmErr) {
         logs.push(`${prefix} ❌ Both failed: ${(llmErr as Error).message}`);
         data = `No ${category} data available`;
@@ -229,7 +227,7 @@ async function aggregatorNode(state: TripStateType): Promise<Partial<TripStateTy
 
 // ─── Draft Agent (1x Groq call) ───────────────────────────────────────────────
 async function draftAgentNode(state: TripStateType): Promise<Partial<TripStateType>> {
-  const logs = ["[DRAFT AGENT] 🧠 Synthesizing all research with Gemini..."];
+  const logs = ["[DRAFT AGENT] 🧠 Synthesizing all research with Groq..."];
 
   const startDate = new Date(state.startDate);
   const endDate   = new Date(state.endDate);
@@ -299,7 +297,7 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
     });
 
     const llm = getLLM(responseSchema, "trip_itinerary");
-    logs.push("[DRAFT AGENT] 📡 Calling Gemini API...");
+    logs.push("[DRAFT AGENT] 📡 Calling Groq API...");
 
     const parsed = await llm.invoke(prompt);
     
@@ -334,7 +332,7 @@ Rules: Exactly ${numDays} day objects. 4-6 activities per day covering morning/a
     const is429 = msg.includes("429") || msg.includes("rate_limit") || msg.includes("Too Many Requests") || msg.includes("rate limit");
     const displayMsg = is429 ? "API ERROR - 429" : `API error occurred: ${msg}`;
     
-    logs.push(`[DRAFT AGENT] ❌ Gemini error: ${is429 ? "429 Rate Limit" : msg}`);
+    logs.push(`[DRAFT AGENT] ❌ Groq error: ${is429 ? "429 Rate Limit" : msg}`);
     logs.push("[DRAFT AGENT] 🔄 Generating structured fallback...");
 
     const fallback: IDay[] = Array.from({ length: numDays }, (_, i) => {
