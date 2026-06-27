@@ -75,7 +75,7 @@ export function getLLM(schema?: any, schemaName?: string): any {
 
   const llms = uniqueKeys.map((key) => {
     let base: any = new ChatGoogleGenerativeAI({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       apiKey: key,
       temperature: 0.3,
       maxOutputTokens: 8000,
